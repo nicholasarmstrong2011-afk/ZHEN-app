@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#000000"/>
+  <!-- Enso circle -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#A4C639" stroke-width="8" opacity="0.3"/>
+  <!-- Brush stroke enso effect -->
+  <path d="M256 76 C370 76 436 142 436 256 C436 370 370 436 256 436 C142 436 76 370 76 256 C76 170 120 100 190 80" 
+        fill="none" stroke="#A4C639" stroke-width="12" stroke-linecap="round" opacity="0.6"/>
+  <!-- Z letter -->
+  <text x="256" y="290" text-anchor="middle" font-family="Georgia, serif" font-size="200" font-weight="800" fill="#FFFFFF">Z</text>
+  <!-- Subtle gold inner glow -->
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#D4AF37" stroke-width="2" opacity="0.2"/>
+</svg>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Zhen — Master the Urge</title>
+
+  <!-- PWA Meta -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Zhen" />
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" href="/icons/icon.svg" type="image/svg+xml" />
+
+  <!-- SEO / Social -->
+  <meta name="description" content="AI-powered sports betting recovery. Master the urge. Reclaim control. Train daily with Zhen." />
+  <meta property="og:title" content="Zhen — Master the Urge" />
+  <meta property="og:description" content="AI-powered sports betting recovery. 2 minutes a day to reclaim control." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://tryzhen.com" />
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Zhen — Master the Urge" />
+  <meta name="twitter:description" content="AI-powered sports betting recovery. 2 minutes a day to reclaim control." />
+
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body, #root {
+      width: 100%; min-height: 100vh; min-height: 100dvh;
+      background: #000; color: #fff; overflow-x: hidden;
+      font-family: Georgia, 'Times New Roman', serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    body { overscroll-behavior: none; }
+    button { font-family: inherit; }
+    /* Safe area padding for notch phones */
+    #root { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+    /* Splash fade-in */
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.7s ease forwards; }
+    .fade-up-d1 { animation-delay: 0.1s; opacity: 0; }
+    .fade-up-d2 { animation-delay: 0.3s; opacity: 0; }
+    .fade-up-d3 { animation-delay: 0.5s; opacity: 0; }
+    .fade-up-d4 { animation-delay: 0.7s; opacity: 0; }
+    /* Glow pulse */
+    @keyframes glowPulse { 0%, 100% { box-shadow: 0 0 30px #A4C63922, 0 0 60px #D4AF3711; } 50% { box-shadow: 0 0 50px #A4C63944, 0 0 80px #D4AF3722; } }
+    .glow-pulse { animation: glowPulse 3s ease-in-out infinite; }
+    /* Breathe circle */
+    @keyframes breatheIn { from { transform: scale(0.7); } to { transform: scale(1.15); } }
+    @keyframes breatheOut { from { transform: scale(1.15); } to { transform: scale(0.7); } }
+    /* Selection flash */
+    @keyframes selectFlash { 0% { background: #A4C63933; } 100% { background: #1A1A1A; } }
+    /* Celebration */
+    @keyframes popIn { 0% { transform: scale(0.3); opacity: 0; } 60% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+    .pop-in { animation: popIn 0.5s ease forwards; }
+    .pop-in-d1 { animation-delay: 0.15s; opacity: 0; }
+    .pop-in-d2 { animation-delay: 0.3s; opacity: 0; }
+    .pop-in-d3 { animation-delay: 0.5s; opacity: 0; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
+  <script>
+  // ── Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+  }
+
+  const { useState, useEffect, useRef, useCallback, createElement: h } = React;
+
+  // ── Constants
+  const C = {
+    black: '#000000', charcoal: '#1A1A1A', bamboo: '#A4C639', wasabi: '#9ACD32',
+    gold: '#D4AF37', amber: '#FFB347', white: '#FFFFFF', soft: '#F5F5F5',
+    gray: '#666666', dimGray: '#333333'
+  };
+
+  const BELTS = [
+    { name: 'White Belt', color: '#FFFFFF', dojos: 0 },
+    { name: 'Yellow Belt', color: '#FFD700', dojos: 7 },
+    { name: 'Green Belt', color: '#A4C639', dojos: 21 },
+    { name: 'Blue Belt', color: '#4A90D9', dojos: 42 },
+    { name: 'Black Belt', color: '#1A1A1A', dojos: 70 },
+  ];
+
+  const WISDOMS = [
+    "You have taken the first step, warrior. This is courage.",
+    "Discipline is choosing between what you want now and what you want most.",
+    "The bamboo that bends is stronger than the oak that resists.",
+    "Every day you train, the urge loses power over you.",
+    "Strength is not the absence of temptation. It is the choice to rise above it.",
+    "You are not fighting alone. The path walks with you.",
+    "One breath, one moment, one choice. That is all it takes.",
+    "The warrior who trains today is free tomorrow.",
+    "Your streak is proof: you are stronger than you believed.",
+    "In stillness, you find the strength that noise tried to steal.",
+  ];
+
+  const TRIGGERS = [
+    { id: 'gameday', emoji: '\u{1F3C0}', label: 'Game days / live sports' },
+    { id: 'nights', emoji: '\u{1F319}', label: 'Late nights / boredom' },
+    { id: 'stress', emoji: '\u{1F630}', label: 'When stressed / anxious' },
+    { id: 'all', emoji: '\u2705', label: 'All of the above' },
+  ];
+
+  const COMMITMENTS = [
+    { id: '2min', label: '2 min/day', sub: 'White Belt Path' },
+    { id: '5min', label: '5 min/day', sub: 'Yellow Belt Path' },
+    { id: '10min', label: '10 min/day', sub: 'Green Belt Path' },
+  ];
+
+  const EMOTIONS = [
+    { id: 'calm', emoji: '\u{1F60C}', label: 'Calm' },
+    { id: 'anxious', emoji: '\u{1F62C}', label: 'Anxious' },
+    { id: 'tempted', emoji: '\u{1F624}', label: 'Tempted' },
+    { id: 'determined', emoji: '\u{1F4AA}', label: 'Determined' },
+    { id: 'struggling', emoji: '\u{1F614}', label: 'Struggling' },
+  ];
+
+  const SK = 'zhen_warrior_data';
+
+  function defaults() {
+    return { triggers:[], commitment:null, completedDojos:0, streak:0, lastCompletedDate:null, todayCompleted:false, todayCompletedTime:null, emotion:null, onboarded:false };
+  }
+
+  function load() {
+    try {
+      const r = localStorage.getItem(SK);
+      if (r) {
+        const d = JSON.parse(r);
+        const today = new Date().toDateString();
+        if (d.lastCompletedDate !== today) {
+          d.todayCompleted = false; d.todayCompletedTime = null; d.emotion = null;
+          if (d.lastCompletedDate) {
+            const diff = Math.floor((new Date() - new Date(d.lastCompletedDate)) / 86400000);
+            if (diff > 1) d.streak = 0;
+          }
+        }
+        return d;
+      }
+    } catch(e) {}
+    return defaults();
+  }
+
+  function save(d) { try { localStorage.setItem(SK, JSON.stringify(d)); } catch(e) {} }
+
+  function getBelt(dojos) {
+    let b = BELTS[0];
+    for (let i = BELTS.length-1; i>=0; i--) { if (dojos >= BELTS[i].dojos) { b = BELTS[i]; break; } }
+    return b;
+  }
+
+  function getNext(dojos) {
+    for (let i=0; i<BELTS.length; i++) { if (dojos < BELTS[i].dojos) return BELTS[i]; }
+    return null;
+  }
+
+  function getProgress(dojos) {
+    const cur = getBelt(dojos), nxt = getNext(dojos);
+    if (!nxt) return 1;
+    return (dojos - cur.dojos) / (nxt.dojos - cur.dojos);
+  }
+
+  // ── Shared UI
+  function Bubble({ text, sub }) {
+    return h('div', { style: { background: C.charcoal, borderRadius: 20, padding: '20px 24px', marginBottom: 24 } },
+      h('div', { style: { fontSize: 13, color: C.bamboo, marginBottom: 6, fontWeight: 700, letterSpacing: 1.5, fontFamily: 'system-ui, sans-serif' } }, 'ZHEN'),
+      h('div', { style: { fontSize: 17, color: C.white, lineHeight: 1.6 } }, text),
+      sub && h('div', { style: { fontSize: 13, color: C.soft, marginTop: 8, opacity: 0.6 } }, sub)
+    );
+  }
+
+  function Pill({ label, onClick, disabled, secondary, small }) {
+    const bg = disabled ? C.dimGray : secondary ? 'transparent' : 'linear-gradient(135deg, '+C.bamboo+', '+C.wasabi+')';
+    return h('button', {
+      onClick: disabled ? undefined : onClick,
+      style: {
+        background: bg, border: secondary ? '1px solid '+C.gold : 'none', borderRadius: 50,
+        padding: small ? '12px 28px' : '16px 40px',
+        color: disabled ? C.gray : secondary ? C.gold : C.black,
+        fontSize: small ? 14 : 17, fontWeight: 700, letterSpacing: 1.5,
+        cursor: disabled ? 'default' : 'pointer',
+        width: secondary||small ? 'auto' : '80%', maxWidth: 340,
+        transition: 'transform 0.15s, opacity 0.15s',
+        opacity: disabled ? 0.5 : 1, textTransform: 'uppercase',
+        fontFamily: 'system-ui, sans-serif'
+      }
+    }, label);
+  }
+
+  function Dots({ current, total }) {
+    return h('div', { style: { display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 28, marginTop: 12 } },
+      Array.from({ length: total }).map((_, i) =>
+        h('div', { key: i, style: { width: 10, height: 10, borderRadius: '50%', background: i === current ? C.bamboo : C.dimGray, transition: 'background 0.3s' } })
+      )
+    );
+  }
+
+  function Ring({ progress, size, sw, color }) {
+    size = size || 100; sw = sw || 5; color = color || C.gold;
+    const r = (size - sw) / 2, circ = 2 * Math.PI * r, off = circ * (1 - Math.min(progress, 1));
+    return h('svg', { width: size, height: size, style: { transform: 'rotate(-90deg)' } },
+      h('circle', { cx: size/2, cy: size/2, r, fill: 'none', stroke: C.dimGray, strokeWidth: sw }),
+      h('circle', { cx: size/2, cy: size/2, r, fill: 'none', stroke: color, strokeWidth: sw,
+        strokeDasharray: circ, strokeDashoffset: off, strokeLinecap: 'round',
+        style: { transition: 'stroke-dashoffset 0.8s ease' }
+      })
+    );
+  }
+
+  const base = { minHeight: '100vh', background: C.black, display: 'flex', flexDirection: 'column', color: C.white, maxWidth: 430, margin: '0 auto', position: 'relative' };
+
+  // ── SPLASH
+  function Splash({ onBegin, onReturn, hasData }) {
+    return h('div', { style: { ...base, justifyContent: 'center', alignItems: 'center', minHeight: '100dvh' } },
+
+      // Enso circle
+      h('div', { className: 'fade-up fade-up-d1 glow-pulse', style: {
+        width: 140, height: 140, borderRadius: '50%', border: '3px solid '+C.bamboo,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 28, position: 'relative'
+      }},
+        h('div', { style: { position: 'absolute', inset: -6, borderRadius: '50%', border: '2px solid '+C.bamboo+'33', borderTopColor: 'transparent', borderRightColor: 'transparent', transform: 'rotate(30deg)' } }),
+        h('span', { style: { fontSize: 64, fontWeight: 800, color: C.white } }, 'Z')
+      ),
+
+      h('h1', { className: 'fade-up fade-up-d2', style: { fontSize: 52, fontWeight: 800, letterSpacing: 8, margin: '0 0 12px' } }, 'ZHEN'),
+      h('p', { className: 'fade-up fade-up-d3', style: { color: C.soft, fontSize: 15, letterSpacing: 2, margin: '0 0 60px', opacity: 0.8, textAlign: 'center', lineHeight: 1.6 } }, 'Master the urge. Reclaim control.'),
+
+      h('div', { className: 'fade-up fade-up-d4' }, h(Pill, { label: 'Begin Training', onClick: onBegin })),
+      hasData && h('div', { className: 'fade-up fade-up-d4', style: { marginTop: 20 } },
+        h(Pill, { label: "I'm a returning warrior", onClick: onReturn, secondary: true, small: true })
+      )
+    );
+  }
+
+  // ── TRIGGERS
+  function TriggersScreen({ onContinue }) {
+    const [sel, setSel] = useState([]);
+    function toggle(id) {
+      if (id === 'all') { setSel(sel.includes('all') ? [] : ['all','gameday','nights','stress']); }
+      else { const n = sel.includes(id) ? sel.filter(s=>s!==id) : [...sel, id]; setSel(n.filter(s=>s!=='all')); }
+    }
+    return h('div', { style: { ...base, padding: '20px 24px' } },
+      h(Dots, { current: 0, total: 3 }),
+      h(Bubble, { text: 'When do urges to bet hit hardest, warrior?', sub: 'Select all that apply.' }),
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 } },
+        TRIGGERS.map(t => {
+          const a = sel.includes(t.id);
+          return h('button', { key: t.id, onClick: () => toggle(t.id), style: {
+            background: C.charcoal, border: '2px solid '+(a?C.bamboo:C.dimGray), borderRadius: 16,
+            padding: '16px 20px', color: C.white, fontSize: 16, textAlign: 'left', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 14, transition: 'border-color 0.2s, transform 0.15s',
+            fontFamily: 'system-ui, sans-serif'
+          }},
+            h('span', { style: { width: 22, height: 22, borderRadius: 6, border: '2px solid '+(a?C.bamboo:C.gray), background: a?C.bamboo:'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, color: C.black, flexShrink: 0, transition: 'all 0.2s' } }, a ? '\u2713' : ''),
+            h('span', { style: { fontSize: 20 } }, t.emoji),
+            h('span', null, t.label)
+          );
+        })
+      ),
+      h('div', { style: { display: 'flex', justifyContent: 'center' } },
+        h(Pill, { label: 'Continue', onClick: () => onContinue(sel), disabled: sel.length === 0 })
+      )
+    );
+  }
+
+  // ── COMMITMENT
+  function CommitmentScreen({ onContinue }) {
+    const [sel, setSel] = useState(null);
+    return h('div', { style: { ...base, padding: '20px 24px' } },
+      h(Dots, { current: 1, total: 3 }),
+      h(Bubble, { text: 'How much time can you commit to daily training?' }),
+      h('div', { style: { display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 } },
+        COMMITMENTS.map(c => {
+          const a = sel === c.id;
+          return h('button', { key: c.id, onClick: () => setSel(c.id), style: {
+            background: C.charcoal, border: '2px solid '+(a?C.bamboo:C.dimGray), borderRadius: 16,
+            padding: '18px 20px', color: C.white, fontSize: 16, textAlign: 'left', cursor: 'pointer',
+            display: 'flex', alignItems: 'center', gap: 14, transition: 'border-color 0.2s',
+            fontFamily: 'system-ui, sans-serif'
+          }},
+            h('span', { style: { width: 22, height: 22, borderRadius: '50%', border: '2px solid '+(a?C.bamboo:C.gray), background: a?C.bamboo:'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 } },
+              a && h('span', { style: { width: 8, height: 8, borderRadius: '50%', background: C.black } })
+            ),
+            h('div', null,
+              h('div', { style: { fontWeight: 600, fontFamily: 'system-ui, sans-serif' } }, c.label),
+              h('div', { style: { fontSize: 13, color: C.soft, opacity: 0.7, marginTop: 2, fontFamily: 'system-ui, sans-serif' } }, c.sub)
+            )
+          );
+        })
+      ),
+      h('div', { style: { display: 'flex', justifyContent: 'center' } },
+        h(Pill, { label: 'Continue', onClick: () => onContinue(sel), disabled: !sel })
+      )
+    );
+  }
+
+  // ── EMOTION CHECK
+  function EmotionScreen({ day, onSelect }) {
+    return h('div', { style: { ...base, padding: '20px 24px' } },
+      h(Dots, { current: 2, total: 3 }),
+      h('div', { style: { fontSize: 13, color: C.bamboo, letterSpacing: 2, textAlign: 'center', marginBottom: 20, fontWeight: 600, fontFamily: 'system-ui, sans-serif' } }, 'DAY ' + day + ' TRAINING'),
+      h(Bubble, { text: 'How are you feeling right now, warrior?' }),
+      h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 } },
+        EMOTIONS.map(e =>
+          h('button', { key: e.id, onClick: () => onSelect(e.id), style: {
+            background: C.charcoal, border: '2px solid '+C.dimGray, borderRadius: 16,
+            padding: '20px 12px', color: C.white, fontSize: 15, cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8,
+            transition: 'border-color 0.2s, transform 0.15s', fontFamily: 'system-ui, sans-serif'
+          }},
+            h('span', { style: { fontSize: 36 } }, e.emoji),
+            h('span', { style: { fontWeight: 500 } }, e.label)
+          )
+        )
+      )
+    );
+  }
+
+  // ── BREATHING
+  function BreathingScreen({ onComplete }) {
+    const [phase, setPhase] = useState('in');
+    const [count, setCount] = useState(4);
+    const [cycle, setCycle] = useState(1);
+    const [circleAnim, setCircleAnim] = useState('breatheIn');
+    const totalCycles = 3;
+
+    useEffect(() => {
+      let sec = 0;
+      const total = totalCycles * 8;
+      const t = setInterval(() => {
+        sec++;
+        if (sec >= total) { clearInterval(t); setTimeout(onComplete, 600); return; }
+        const cs = sec % 8, cc = Math.floor(sec / 8) + 1;
+        setCycle(cc);
+        if (cs < 4) { setPhase('in'); setCount(4 - cs); setCircleAnim('breatheIn'); }
+        else { setPhase('out'); setCount(4 - (cs - 4)); setCircleAnim('breatheOut'); }
+      }, 1000);
+      return () => clearInterval(t);
+    }, [onComplete]);
+
+    return h('div', { style: { ...base, justifyContent: 'center', alignItems: 'center', minHeight: '100dvh' } },
+      h('div', { style: { fontSize: 13, color: C.bamboo, letterSpacing: 2, marginBottom: 48, fontWeight: 600, opacity: 0.7, fontFamily: 'system-ui, sans-serif' } }, 'CYCLE ' + cycle + ' OF ' + totalCycles),
+
+      // Breathing circle
+      h('div', { style: { position: 'relative', width: 200, height: 200, marginBottom: 48, display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+        h('div', { style: { width: 160, height: 160, borderRadius: '50%', border: '2px solid '+C.bamboo+'44', position: 'absolute' } }),
+        h('div', { key: cycle+'-'+phase, style: {
+          width: 160, height: 160, borderRadius: '50%',
+          background: 'radial-gradient(circle, '+C.bamboo+'18, '+C.bamboo+'05)',
+          border: '2px solid '+C.bamboo,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          animation: circleAnim + ' 4s ease forwards',
+          boxShadow: '0 0 50px '+C.bamboo+'22'
+        }},
+          h('span', { style: { fontSize: 48, fontWeight: 300, color: C.white } }, count)
+        )
+      ),
+
+      h('div', { style: { fontSize: 24, color: C.white, fontWeight: 300, letterSpacing: 3, textTransform: 'uppercase', marginBottom: 8 } }, 'Breathe ' + (phase === 'in' ? 'in' : 'out')),
+      h('div', { style: { fontSize: 14, color: C.soft, opacity: 0.5, marginTop: 12 } }, 'Breathe with me.')
+    );
+  }
+
+  // ── COMPLETE
+  function CompleteScreen({ data, onContinue }) {
+    const belt = getBelt(data.completedDojos), nxt = getNext(data.completedDojos), prog = getProgress(data.completedDojos);
+    const w = WISDOMS[data.completedDojos % WISDOMS.length];
+    return h('div', { style: { ...base, justifyContent: 'center', alignItems: 'center', padding: '20px 24px', minHeight: '100dvh' } },
+      h('div', { className: 'pop-in', style: { fontSize: 64, marginBottom: 16 } }, '\u{1F43C}'),
+      h('h2', { className: 'pop-in pop-in-d1', style: { fontSize: 30, fontWeight: 700, margin: '0 0 24px', textAlign: 'center' } }, 'Day ' + data.completedDojos + ' Complete'),
+
+      h('div', { className: 'pop-in pop-in-d2', style: { background: C.charcoal, borderRadius: 20, padding: '20px 24px', marginBottom: 28, maxWidth: 320, width: '100%' } },
+        h('div', { style: { fontSize: 13, color: C.bamboo, marginBottom: 6, fontWeight: 700, letterSpacing: 1.5, fontFamily: 'system-ui, sans-serif' } }, 'ZHEN'),
+        h('div', { style: { fontSize: 16, color: C.white, lineHeight: 1.6, fontStyle: 'italic' } }, '\u201C' + w + '\u201D')
+      ),
+
+      h('div', { className: 'pop-in pop-in-d3', style: { position: 'relative', marginBottom: 16 } },
+        h(Ring, { progress: prog, size: 100, sw: 5, color: C.gold }),
+        h('div', { style: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' } },
+          h('span', { style: { fontSize: 11, color: C.soft, opacity: 0.7, fontFamily: 'system-ui, sans-serif' } }, belt.name.toUpperCase()),
+          h('span', { style: { fontSize: 16, color: C.gold, fontWeight: 700 } }, nxt ? data.completedDojos+'/'+nxt.dojos : 'MAX')
+        )
+      ),
+
+      h('div', { style: { fontSize: 13, color: C.soft, opacity: 0.6, marginBottom: 32, fontFamily: 'system-ui, sans-serif' } }, nxt ? (nxt.dojos - data.completedDojos)+' more dojos to '+nxt.name : 'You have reached mastery.'),
+      h(Pill, { label: 'Continue', onClick: onContinue })
+    );
+  }
+
+  // ── HOME
+  function HomeScreen({ data, onTrain, onReset }) {
+    const belt = getBelt(data.completedDojos), nxt = getNext(data.completedDojos), prog = getProgress(data.completedDojos);
+    const done = data.todayCompleted;
+    return h('div', { style: { ...base, padding: '20px 24px', minHeight: '100dvh' } },
+
+      // Header
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, paddingTop: 8 } },
+        h('div', null,
+          h('div', { style: { fontSize: 11, color: C.bamboo, letterSpacing: 2, fontWeight: 600, marginBottom: 4, fontFamily: 'system-ui, sans-serif' } }, 'ZHEN'),
+          h('div', { style: { fontSize: 22, fontWeight: 700 } }, 'Welcome, Warrior')
+        ),
+        h('div', { style: { width: 44, height: 44, borderRadius: '50%', border: '2px solid '+C.bamboo+'44', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 22 } }, '\u{1F43C}')
+      ),
+
+      // Belt card
+      h('div', { style: { background: C.charcoal, borderRadius: 20, padding: 24, marginBottom: 20, border: '1px solid '+C.gold+'22', boxShadow: '0 0 30px '+C.gold+'08' } },
+        h('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
+          h('div', null,
+            h('div', { style: { fontSize: 18, fontWeight: 700, marginBottom: 4 } }, belt.name),
+            h('div', { style: { fontSize: 14, color: C.soft, opacity: 0.7, fontFamily: 'system-ui, sans-serif' } }, 'Day ' + data.completedDojos),
+            h('div', { style: { fontSize: 15, color: C.amber, fontWeight: 600, marginTop: 8, fontFamily: 'system-ui, sans-serif' } },
+              data.streak > 0 ? data.streak + ' day streak \u{1F525}' : h('span', { style: { color: C.soft, opacity: 0.5 } }, 'Start your streak today')
+            )
+          ),
+          h('div', { style: { position: 'relative' } },
+            h(Ring, { progress: prog, size: 80, sw: 5, color: C.gold }),
+            h('div', { style: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' } },
+              h('span', { style: { fontSize: 16, color: C.gold, fontWeight: 700, fontFamily: 'system-ui, sans-serif' } }, nxt ? Math.round(prog*100)+'%' : '\u2713')
+            )
+          )
+        ),
+        nxt && h('div', { style: { fontSize: 12, color: C.soft, opacity: 0.5, marginTop: 12, fontFamily: 'system-ui, sans-serif' } }, (nxt.dojos - data.completedDojos)+' dojos to '+nxt.name)
+      ),
+
+      // Training button
+      h('button', { onClick: done ? undefined : onTrain, style: {
+        width: '100%', background: done ? C.charcoal : 'linear-gradient(135deg, '+C.bamboo+', '+C.wasabi+')',
+        border: done ? '1px solid '+C.bamboo+'33' : 'none', borderRadius: 20, padding: '28px 24px',
+        cursor: done ? 'default' : 'pointer', marginBottom: 20, transition: 'transform 0.15s', textAlign: 'center'
+      }},
+        h('div', { style: { fontSize: 28, marginBottom: 8 } }, done ? '\u2705' : '\u{1F94B}'),
+        h('div', { style: { fontSize: 18, fontWeight: 700, color: done ? C.bamboo : C.black, letterSpacing: 1, fontFamily: 'system-ui, sans-serif' } }, done ? 'TRAINING COMPLETE' : "TODAY'S TRAINING"),
+        h('div', { style: { fontSize: 13, color: done ? C.soft : C.black, opacity: done ? 0.5 : 0.7, marginTop: 4, fontFamily: 'system-ui, sans-serif' } }, done ? 'Completed at '+data.todayCompletedTime : 'Start your daily dojo (2 min)')
+      ),
+
+      // Need help now
+      h('div', { style: { textAlign: 'center', marginBottom: 24 } },
+        h('button', { style: { background: 'none', border: '1px solid '+C.gold+'44', borderRadius: 50, padding: '12px 28px', color: C.gold, fontSize: 14, cursor: 'pointer', letterSpacing: 1, fontFamily: 'system-ui, sans-serif' } }, 'Need help now?'),
+        h('div', { style: { fontSize: 11, color: C.soft, opacity: 0.4, marginTop: 6, fontFamily: 'system-ui, sans-serif' } }, 'Urge Sparring \u2014 Coming in v1.1')
+      ),
+
+      // Stats
+      h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 } },
+        [{ l: 'Dojos', v: data.completedDojos }, { l: 'Streak', v: data.streak+'\u{1F525}' }, { l: 'Belt', v: belt.name.split(' ')[0] }].map(s =>
+          h('div', { key: s.l, style: { background: C.charcoal, borderRadius: 14, padding: '14px 8px', textAlign: 'center' } },
+            h('div', { style: { fontSize: 20, fontWeight: 700 } }, s.v),
+            h('div', { style: { fontSize: 11, color: C.soft, opacity: 0.5, marginTop: 2, letterSpacing: 1, fontFamily: 'system-ui, sans-serif' } }, s.l.toUpperCase())
+          )
+        )
+      ),
+
+      // Reset
+      h('button', { onClick: onReset, style: { position: 'fixed', bottom: 8, left: 8, background: 'none', border: 'none', color: C.gray, fontSize: 10, cursor: 'pointer', opacity: 0.3, fontFamily: 'system-ui, sans-serif' } }, 'RESET')
+    );
+  }
+
+  // ── APP
+  function App() {
+    const [data, setData] = useState(load);
+    const [screen, setScreen] = useState('splash');
+
+    function up(u) { setData(p => { const n = { ...p, ...u }; save(n); return n; }); }
+    function reset() { const f = defaults(); save(f); setData(f); setScreen('splash'); }
+
+    switch(screen) {
+      case 'splash': return h(Splash, { onBegin: () => setScreen(data.onboarded ? 'home' : 'triggers'), onReturn: () => setScreen('home'), hasData: data.onboarded });
+      case 'triggers': return h(TriggersScreen, { onContinue: t => { up({ triggers: t }); setScreen('commitment'); } });
+      case 'commitment': return h(CommitmentScreen, { onContinue: c => { up({ commitment: c, onboarded: true }); setScreen('emotion'); } });
+      case 'emotion': return h(EmotionScreen, { day: data.completedDojos + 1, onSelect: e => { up({ emotion: e }); setScreen('breathing'); } });
+      case 'breathing': return h(BreathingScreen, { onComplete: () => {
+        const now = new Date();
+        up({ completedDojos: data.completedDojos+1, streak: data.streak+1, todayCompleted: true, todayCompletedTime: now.toLocaleTimeString([], { hour:'numeric', minute:'2-digit' }), lastCompletedDate: now.toDateString() });
+        setScreen('complete');
+      }});
+      case 'complete': return h(CompleteScreen, { data, onContinue: () => setScreen('home') });
+      case 'home': return h(HomeScreen, { data, onTrain: () => setScreen('emotion'), onReset: reset });
+      default: return h(Splash, { onBegin: () => setScreen('triggers'), onReturn: () => setScreen('home'), hasData: data.onboarded });
+    }
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(h(App));
+  </script>
+</body>
+</html>
